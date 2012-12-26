@@ -113,6 +113,9 @@
             camera:title="@string/pref_camera_scenemode_entry_hdr"
             camera:entries="@array/pref_camera_hdr_entries"
             camera:entryValues="@array/pref_camera_hdr_entryvalues" />
+    <StoragePreference
+            camera:key="pref_camera_storage_key"
+            camera:title="@string/pref_camera_storage_title" />
     <IconListPreference
             camera:key="pref_nohands_shutter_key"
             camera:title="@string/pref_camera_nohands_title"
@@ -126,4 +129,5 @@
             camera:entries="@array/pref_nohands_persistent_entries"
             camera:defaultValue="@string/pref_nohands_persistent_default"
             camera:entryValues="@array/pref_nohands_persistent_entryvalues" />
+
 </PreferenceGroup>

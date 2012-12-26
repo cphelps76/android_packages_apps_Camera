@@ -483,11 +483,6 @@ public class PhotoModule
         // Surface texture is from camera screen nail and startPreview needs it.
         // This must be done before startPreview.
         mIsImageCaptureIntent = isImageCaptureIntent();
-        if (reuseNail) {
-            mActivity.reuseCameraScreenNail(!mIsImageCaptureIntent);
-        } else {
-            mActivity.createCameraScreenNail(!mIsImageCaptureIntent);
-        }
 
         mPreferences.setLocalId(mActivity, mCameraId);
         CameraSettings.upgradeLocalPreferences(mPreferences.getLocal());
@@ -502,6 +497,12 @@ public class PhotoModule
         initializeMiscControls();
         mLocationManager = new LocationManager(mActivity, this);
         initOnScreenIndicator();
+
+        if (reuseNail) {
+            mActivity.reuseCameraScreenNail(!mIsImageCaptureIntent);
+        } else {
+            mActivity.createCameraScreenNail(!mIsImageCaptureIntent);
+        }
     }
 
     // Prompt the user to pick to record location for the very first run of
@@ -548,7 +549,7 @@ public class PhotoModule
             .apply();
         // TODO: Fix this to use the actual onSharedPreferencesChanged listener
         // instead of invoking manually
-        onSharedPreferenceChanged();
+        onSharedPreferenceChanged(RecordLocationPreference.KEY);
     }
 
     private void initializeRenderOverlay() {
@@ -679,7 +680,7 @@ public class PhotoModule
         queue.addIdleHandler(new MessageQueue.IdleHandler() {
             @Override
             public boolean queueIdle() {
-                Storage.ensureOSXCompatible();
+                Storage.getStorage().ensureOSXCompatible();
                 return false;
             }
         });
@@ -1225,7 +1226,7 @@ public class PhotoModule
         // Runs in saver thread
         private void storeImage(final byte[] data, Uri uri, String title,
                 Location loc, int width, int height, int orientation) {
-            boolean ok = Storage.updateImage(mContentResolver, uri, title, loc,
+            boolean ok = Storage.getStorage().updateImage(mContentResolver, uri, title, loc,
                     orientation, data, width, height);
             if (ok) {
                 Util.broadcastNewPicture(mActivity, uri);
@@ -1315,14 +1316,14 @@ public class PhotoModule
         // Runs in namer thread
         private void generateUri() {
             mTitle = Util.createJpegName(mDateTaken);
-            mUri = Storage.newImage(mResolver, mTitle, mDateTaken, mWidth, mHeight);
+            mUri = Storage.getStorage().newImage(mResolver, mTitle, mDateTaken, mWidth, mHeight);
             sHDRShotsPaths.add(mUri);
         }
 
         // Runs in namer thread
         private void cleanOldUri() {
             if (mUri == null) return;
-            Storage.deleteImage(mResolver, mUri);
+            Storage.getStorage().deleteImage(mResolver, mUri);
             mUri = null;
         }
     }
@@ -1810,7 +1811,7 @@ public class PhotoModule
 
                                 // delete source images
                                 for (int i = 0; i < sHDRShotsPaths.size()-1; i++) {
-                                    Storage.deleteImage(mContentResolver, sHDRShotsPaths.get(i));
+                                    Storage.getStorage().deleteImage(mContentResolver, sHDRShotsPaths.get(i));
                                 }
 
                                 // reset exposure
@@ -2747,13 +2748,18 @@ public class PhotoModule
     }
 
     @Override
-    public void onSharedPreferenceChanged() {
+    public void onSharedPreferenceChanged(String key) {
         // ignore the events after "onPause()"
         if (mPaused) return;
 
         boolean recordLocation = RecordLocationPreference.get(
                 mPreferences, mContentResolver);
         mLocationManager.recordLocation(recordLocation);
+
+        if (CameraSettings.KEY_STORAGE.equals(key)) {
+            mActivity.updateStorageSpaceAndHint();
+            mActivity.reuseCameraScreenNail(!mIsImageCaptureIntent);
+        }
 
         setCameraParametersWhenIdle(UPDATE_PARAM_PREFERENCE);
         setPreviewFrameLayoutAspectRatio();

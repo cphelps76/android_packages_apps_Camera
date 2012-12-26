@@ -97,6 +97,7 @@ public class PhotoController extends PieController
         }
         addItem(CameraSettings.KEY_NOHANDS_MODE, (float)(1.5 * FLOAT_PI_DIVIDED_BY_TWO) + sweep, sweep);
         mOtherKeys = new String[] {
+                CameraSettings.KEY_STORAGE,
                 CameraSettings.KEY_SCENE_MODE,
                 CameraSettings.KEY_RECORD_LOCATION,
                 CameraSettings.KEY_POWER_SHUTTER,
