@@ -2705,6 +2705,7 @@ public class PhotoModule
                 Log.d(TAG, "Restarting preview");
                 startPreview();
                 mRestartPreview = false;
+                mHandler.sendEmptyMessage(START_PREVIEW_DONE);
             }
             setCameraParameters(mUpdateSet);
             updateSceneModeUI();
