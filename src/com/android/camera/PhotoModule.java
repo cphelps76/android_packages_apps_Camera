@@ -2949,13 +2949,14 @@ public class PhotoModule
     }
 
     void setPreviewFrameLayoutCameraOrientation(){
-       CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
-
        //if camera mount angle is 0 or 180, we want to resize preview
-       if(info.orientation % 180 == 0){
-           mPreviewFrameLayout.cameraOrientationPreviewResize(true);
-       } else{
-           mPreviewFrameLayout.cameraOrientationPreviewResize(false);
+       if (Util.supportsOrientationResizePreview()) {
+           CameraInfo info = CameraHolder.instance().getCameraInfo()[mCameraId];
+           if(info.orientation % 180 == 0){
+               mPreviewFrameLayout.cameraOrientationPreviewResize(true);
+           } else{
+               mPreviewFrameLayout.cameraOrientationPreviewResize(false);
+           }
        }
     }
 
